@@ -18,13 +18,29 @@ import k_and_s_pkg::*;
     output logic                    signed_overflow,
     output logic              [4:0] ram_addr,
     output logic             [15:0] data_out,
-    input  logic             [15:0] data_in
-
+    input  logic             [15:0] data_in,
+    
+    input logic [5:0] A,
+    input logic [5:0] B
 );
 
-// added to remove warning from testbench
-// remove it
-assign ram_addr = 'd0;
-// remove 
+
+logic [5:0] pc_reg;
+logic soma;
+logic branch_out;
+logic addr_out;
+
+assign soma = pc_reg + B;
+
+assign branch_out = (branch?A:soma);
+
+always_ff @(posedge clk) begin
+  if (pc_enable)
+    pc_reg <= branch_out;
+end
+
+assign addr_out = (addr_sel?A:pc_reg);
+
+assign ram_addr = addr_out;
 
 endmodule : data_path
