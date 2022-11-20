@@ -18,17 +18,11 @@ import k_and_s_pkg::*;
     output logic                    signed_overflow,
     output logic              [4:0] ram_addr,
     output logic             [15:0] data_out,
-    input  logic             [15:0] data_in,
-   
-    output logic       cy,
-    input  logic       ldR_out
+    input  logic             [15:0] data_in
 );
 
 logic [4:0] pc_reg;
 logic [15:0] ir_reg;
-logic sum;
-logic branch_out;
-logic addr_out;
 logic [1:0] a_addr;
 logic [1:0] b_addr;
 logic [1:0] c_addr;
@@ -36,6 +30,12 @@ logic [4:0] mem_addr;
 logic [15:0] bus_a;
 logic [15:0] bus_b;
 logic [15:0] bus_c;
+logic [15:0] alu_out;
+logic flag_zero;
+logic flag_neg;
+logic flag_unsigned_overflow;
+logic flag_signed_overflow;
+logic carry_in_ultimo_bit;
 
 always_ff @(posedge clk) begin
   if (ir_enable)
@@ -56,7 +56,7 @@ always_comb begin : decoder
     end
 
     8'b1000_0010: begin
-      decoded_instruction = I_LOAD;
+      decoded_instruction = I_STORE;
       a_addr = ir_reg[6:5];
       mem_addr = ir_reg[4:0];
     end
@@ -121,7 +121,7 @@ always_comb begin : decoder
   endcase
 end
 
-always_ff @(posedge clk) begin // FF calcula program_counter
+always_ff @(posedge clk) begin : pc_ctrl // FF program_counter
   if (pc_enable) begin
     if (branch)
         pc_reg <= mem_addr;
@@ -130,19 +130,117 @@ always_ff @(posedge clk) begin // FF calcula program_counter
     end
 end
 
-assign addr_out = (addr_sel?mem_addr:pc_reg);
-
-assign ram_addr = addr_out;
-
-// Banco de Registradores
-logic [15:0] rf [3] = '{ default: 8'd87};
-
-always_ff @(posedge clk) begin
-  if (write_reg_enable)
-    rf[bus_a] <= a_addr;
-    rf[bus_b] <= b_addr;
-    rf[bus_c] <= c_addr;
+always_ff @(posedge clk) begin // Precisa do clock pois precisa do pc_reg calculado.
+  if (addr_sel) begin
+      ram_addr <= mem_addr;
+  end else begin
+      ram_addr <= pc_reg;
+  end
 end
 
+assign bus_c = (c_sel?data_in:alu_out);
+
+// Banco de Registradores
+logic [15:0] r [4] = '{ default: 8'd87};
+
+always_ff @(posedge clk) begin
+  if(rst_n) begin
+    r[0] = 15'b000000000000000;
+    r[1] = 15'b000000000000000;
+    r[2] = 15'b000000000000000;
+    r[3] = 15'b000000000000000;
+  end
+ 
+  if (write_reg_enable) begin
+    case (a_addr)
+      2'b00: begin
+        bus_a <= r[0];
+      end
+
+      2'b01: begin
+        bus_a <= r[1];
+      end
+
+      2'b10: begin
+        bus_a <= r[2];
+      end
+
+      2'b11: begin
+        bus_a <= r[3];
+      end
+    endcase
+
+    data_out <= bus_a;
+
+    case (b_addr)
+
+      2'b00: begin
+        bus_b <= r[0];
+      end
+      2'b01: begin
+        bus_b <= r[1];
+      end
+      2'b10: begin
+        bus_b <= r[2];
+      end
+      2'b11: begin
+        bus_b <= r[3];
+      end
+
+    endcase
+
+    case (c_addr)
+      2'b00: begin
+        r[0] <= bus_c;
+      end
+      2'b01: begin
+        r[1] <= bus_c;
+      end
+      2'b10: begin
+        r[2] <= bus_c;
+      end
+      2'b11: begin
+        r[3] <= bus_c;
+      end
+    endcase
+  end
+end
+
+always_comb begin : ula_ctr
+  case(operation)
+    2'b00:  begin // OR
+      alu_out = bus_a | bus_b;
+      flag_signed_overflow = 1'b0;
+      flag_unsigned_overflow = 1'b0;
+      carry_in_ultimo_bit = 1'b0;
+    end
+    2'b01: begin // ADD
+      {carry_in_ultimo_bit, alu_out[14:0]} = bus_a[14:0] + bus_b[14:0];
+      {flag_unsigned_overflow, alu_out[15]} = bus_a[15] + bus_b[15] + carry_in_ultimo_bit;
+      flag_signed_overflow = flag_unsigned_overflow ^ carry_in_ultimo_bit;
+    end
+    2'b10: begin // SUB
+      {carry_in_ultimo_bit, alu_out[14:0]} = bus_a[14:0] - bus_b[14:0];
+      {flag_unsigned_overflow, alu_out[15]} = bus_a[15] - bus_b[15] - carry_in_ultimo_bit;
+      flag_signed_overflow = flag_unsigned_overflow ^ carry_in_ultimo_bit;
+    end
+    default: begin // AND
+      alu_out = bus_a & bus_b;
+      flag_signed_overflow = 1'b0;
+      flag_unsigned_overflow = 1'b0;
+      carry_in_ultimo_bit = 1'b0;
+    end
+  endcase
+flag_neg = alu_out[15];
+flag_zero = ~|(alu_out);
+end
+ 
+always_ff @(posedge clk) begin
+  if (flags_reg_enable)
+    zero_op <= flag_zero;
+    neg_op <= flag_neg;
+    unsigned_overflow <= flag_unsigned_overflow;
+    signed_overflow <= flag_signed_overflow;
+end
 
 endmodule : data_path
