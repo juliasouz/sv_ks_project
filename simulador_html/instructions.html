@@ -115,22 +115,38 @@ Instruction:</td></tr>
 Instruction:</td></tr>
 <tr><td>
 <tt>NOP<br>
-<tt>HALT
+<tt>HALT<br>
+<tt>BOV[MEM]<br>
+<tt>BNOV[MEM]<br>
+<tt>BNNEG[MEM]<br>
+<tt>BNZERO[MEM]
 </td>
 
 <td>
 <tt>NOP<br>
-<tt>HALT
+<tt>HALT<br>
+<tt>BOV 10<br>
+<tt>BNOV 10<br>
+<tt>BNNEG 10<br>
+<tt>BNZERO 12
 </td>
 
 <td>
 <tt>Do nothing.<br>
-<tt>Halt the machine.
+<tt>Halt the machine.<br>
+<tt>PC = 10 SE ÚLTIMO RESULTADO DA ULA TEVE UNSIGNED OVERFLOW<br>
+<tt>PC = 10 SE ÚLTIMO RESULTADO DA ULA NÃO TEVE UNSIGNED OVERFLOW<br>
+<tt>PC = 10 SE ÚLTIMO RESULTADO DA ULA NÃO FOR NEGATIVO<br>
+<tt>PC = 12 SE ÚLTIMO RESULTADO DA ULA NÃO FOR ZERO
 </td>
 
 <td>
 <tt>0000 0000 0000 0000<br>
-<tt>1111 1111 1111 1111
+<tt>1111 1111 1111 1111<br>
+<tt>0 000 0101 000 MMMMM<br>
+<tt>0 000 0110 000 MMMMM<br>
+<tt>0 000 1010 000 MMMMM<br>
+<tt>0 000 1011 000 MMMMM
 </td>
 </tr>
 
