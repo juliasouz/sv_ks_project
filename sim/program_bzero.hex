@@ -1,9 +1,9 @@
-;  Programa de Teste 1
-;  Autor Joao Leonardo Fragoso
+;  Programa de Teste 1 - STORE
+;  Autor Bruna e Julia
 0000
-814b
-812c
-a139
+8100
+8100
+020d
 0000
 0000
 0000
@@ -11,9 +11,9 @@ ffff
 0000
 0000
 0000
-0016
-a120
-0000
+0001
+0001
+0212
 0000
 0000
 0000

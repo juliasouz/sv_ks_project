@@ -169,7 +169,7 @@ always_comb begin : bus_c_out
 end
 
 // Banco de Registradores
-logic [15:0] r [4] = '{ default: 8'd87}; 
+logic [15:0] r[4] = '{ default: 8'd87}; 
 
 always_ff @(posedge clk) begin 
     if(!rst_n) begin
