@@ -81,32 +81,22 @@ always_comb begin : calc_next_state
 
                 I_OR : begin
                     next_state = ALU_CALC;
-                    operation = 2'b00;
-                    flags_reg_enable = 1'b1;
                 end
 
                 I_ADD : begin
                     next_state = ALU_CALC;
-                    operation = 2'b01;
-                    flags_reg_enable = 1'b1;
                 end
 
                 I_SUB : begin
                     next_state = ALU_CALC;
-                    operation = 2'b10;
-                    flags_reg_enable = 1'b1;
                 end
 
                 I_AND : begin
                     next_state = ALU_CALC;
-                    operation = 2'b11;
-                    flags_reg_enable = 1'b1;
                 end
 
                 I_MOVE : begin
                     next_state = ALU_CALC;
-                    operation = 2'b00;
-                    flags_reg_enable = 1'b0;
                 end
 
                 I_STORE : begin
@@ -174,6 +164,27 @@ always_comb begin : calc_next_state
             ir_enable = 1'b1;
             c_sel = 1'b1;
             write_reg_enable = 1'b1;
+            flags_reg_enable = 1'b1;
+
+            if(I_OR) begin
+                operation = 2'b00;
+            end
+
+            if(I_ADD) begin
+                operation = 2'b01;
+            end
+
+            if(I_SUB) begin
+                operation = 2'b10;
+            end
+
+            if(I_AND) begin
+                operation = 2'b11;
+            end
+
+            if(I_MOVE) begin
+                operation = 2'b00;
+            end
         end
 
         STORE_RAM : begin

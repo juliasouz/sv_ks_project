@@ -182,55 +182,55 @@ always_ff @(posedge clk) begin
     if (write_reg_enable) begin
         case (a_addr)
             2'b00: begin
-                bus_a <= r[0];
+                bus_a = r[0];
             end
 
             2'b01: begin
-                bus_a <= r[1];
+                bus_a = r[1];
             end
 
             2'b10: begin
-                bus_a <= r[2];
+                bus_a = r[2];
             end
 
             2'b11: begin
-                bus_a <= r[3];
+                bus_a = r[3];
             end
         endcase
 
         case (b_addr)
             2'b00: begin
-                bus_b <= r[0];
+                bus_b = r[0];
             end
 
             2'b01: begin
-                bus_b <= r[1];
+                bus_b = r[1];
             end
 
             2'b10: begin
-                bus_b <= r[2];
+                bus_b = r[2];
             end
 
             2'b11: begin
-                bus_b <= r[3];
+                bus_b = r[3];
             end
         endcase
 
         case (c_addr)
             2'b00: begin
-                r[0] <= bus_c;
+                r[0] = bus_c;
             end
 
             2'b01: begin
-                r[1] <= bus_c;
+                r[1] = bus_c;
             end
 
             2'b10: begin
-                r[2] <= bus_c;
+                r[2] = bus_c;
             end
 
             2'b11: begin
-                r[3] <= bus_c;
+                r[3] = bus_c;
             end
         endcase
     end
